@@ -44,25 +44,40 @@ cd JHPIEGO
 
 ---
 ## Project Objective
-Team CoQ10's goal is to help address this issue by building an inclusive machine learning model for dermatology.
+Our team’s objective is to improve cervical cancer screening in low-resource settings by developing machine learning models that can support and enhance **Visual Inspection with Acetic Acid (VIA)**. VIA is widely used in low- and middle-income countries (LMICs) due to its low cost and ability to support same-day screen-and-treat workflows, but it is highly operator-dependent and prone to inconsistent interpretation.
 
-Our first milestone as a team is to train a Convolutional Neural Network (CNN) that can classify 21 different skin conditions while ensuring fairness, transparency, and robust performance across all demographic groups. We use publically available dermatology datasets from Kaggle as our starting point.
+This project aims to build an AI-assisted VIA decision-support system capable of:
+- Classifying VIA images into clinically meaningful categories (VIA-negative, VIA-positive, suspicious for cancer)
+- Accurately segmenting key anatomical structures (cervix, SCJ, acetowhite lesions)
+- Ultimately improving screening quality and reducing global disparities in cervical cancer outcomes
 
 ## Real-World Significance and Impact 🌍
 
-The importance of equitable AI in dermatology cannot be overstated. Dermatological conditions often appear differently across varying skin tones, which makes it crucial for AI models to be trained on diverse datasets to ensure accuracy for all individuals, regardless of skin color. AI tools trained predominantly on lighter skin tones can lead to misdiagnoses and delayed treatments for individuals with darker skin, exacerbating health disparities and perpetuating inequalities in healthcare.
+Cervical cancer is preventable, yet it remains a major cause of death for women in LMICs. Over **90% of global cervical cancer deaths** occur in these settings, largely due to limited access to screening and early detection. VIA is currently one of the only scalable screening tools available, but its effectiveness depends heavily on provider experience and the ability to correctly identify:
 
-By addressing these biases and creating a more inclusive AI model, our project can have a profound impact on healthcare equity. Accurate AI-based dermatology tools, accessible to everyone, would reduce misdiagnosis rates and ensure timely, effective treatments, especially for underserved communities. With a model that performs well across all skin tones, we can improve healthcare outcomes, build trust in AI systems, and contribute to a more inclusive, fairer healthcare system globally.
+- The **cervix** and its orientation  
+- The **squamocolumnar junction (SCJ)** and transformation zone  
+- **Acetowhite lesions**, which indicate dysplasia after acetic acid application  
 
-Furthermore, the insights gained from our work can influence future AI research and development in dermatology, advocating for fairness and inclusivity at every stage. Our focus on ensuring transparency, fairness, and robust model performance across diverse skin tones will set a valuable precedent for the design and deployment of AI tools in healthcare, ultimately contributing to better health outcomes for all communities.
+Incorrect interpretation can result in missed precancerous lesions, unnecessary referrals, delayed treatment, or misclassification of cancer risk.
 
+AI has the potential to support frontline clinicians by providing more consistent, objective interpretations of VIA images. An effective AI-supported VIA tool could:
+
+- Reduce diagnostic variability across providers  
+- Enable earlier detection of precancerous lesions  
+- Improve treatment eligibility decisions (e.g., cryotherapy vs. referral)  
+- Strengthen screening programs in resource-constrained environments  
+
+By focusing on clinically relevant anatomical segmentation and classification, this project contributes to global cervical cancer elimination goals and supports more equitable access to high-quality screening.
 
 ## Project Goals
-- **Develop a CNN model** capable of classifying 21 skin conditions from medical images.
-- **Ensure fairness** by improving performance across diverse skin tones and mitigating bias.
-- **Leverage data augmentation & transfer learning** to enhance model generalization.
-- **Monitor fairness metrics** (F-score, confusion matrix) to evaluate model impact.
-- **Optimize model performance** through learning rate scheduling, class balancing, and regularization.
+
+- **Develop classification models** capable of predicting VIA-negative, VIA-positive, and suspicious-for-cancer categories.  
+- **Implement segmentation models** (YOLOv8-Seg, U-Net, nn-UNet) to identify the cervix, SCJ, and acetowhite lesions.  
+- **Standardize VIA image preprocessing** through cropping, normalization, and augmentation pipelines.  
+- **Address dataset limitations** through manual annotation, expert-reviewed segmentation, and rule-based label mapping.  
+- **Evaluate model performance** using accuracy, F1-score, Dice coefficient, and qualitative visual inspection.  
+- **Support equitable screening** by improving reliability in settings where variability in clinical expertise affects outcomes.  
 
 --- 
 ## Data Exploration
