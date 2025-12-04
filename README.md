@@ -1,33 +1,46 @@
 # Artificial Intelligence in Global Health - Visual Inspection with Acetic Acid (VIA) in Cervical Cancer
 
 ## Overview
-Artificial Intelligence (AI) is revolutionizing healthcare, offering unprecedented advancements in disease detection, diagnosis, and treatment planning. However, many dermatology AI tools struggle to deliver accurate results for individuals with darker skin tones, largely due to a lack of diverse training data. This bias in AI models can lead to misdiagnoses, delayed treatments, and exacerbated health disparities for underrepresented communities.
+Cervical cancer is a major global health burden, causing more than 340,000 deaths annually, with approximately **90% occurring in low- and middle-income countries (LMICs)** where screening resources are limited. Visual Inspection with Acetic Acid (VIA) is widely used in these settings due to its low cost, rapid results, and compatibility with single-visit screen-and-treat workflows.
 
-Skin conditions often manifest differently across varying skin tones, and an AI model trained predominantly on lighter skin tones may fail to recognize these variations. As a result, individuals with darker skin tones may face a higher risk of inaccurate assessments, potentially leading to inequitable healthcare outcomes.
+Despite its operational advantages, VIA interpretation is **highly operator-dependent**. Accurate screening requires reliable identification of key anatomical structures—the **cervix**, **squamocolumnar junction (SCJ)**, and **transformation zone (TZ)**—and evaluation of **acetowhite lesions** after acetic acid application. Variability in provider training, environmental conditions, and the presence of confounding factors such as inflammation often leads to inconsistent or inaccurate VIA outcomes.
+
+This project investigates the use of artificial intelligence to improve VIA reliability and support frontline health workers in resource-limited settings. The repository includes:
+
+- **Image Classification Models**
+  - EfficientNet-B3 (binary and three-class classification)
+  - PaliGemma vision encoder + custom MLP classifier
+  - Hierarchical two-gate system for improved cancer detection
+
+- **Segmentation Models**
+  - YOLOv8-Seg
+  - Standard U-Net
+  - nn-UNet for cervix, SCJ, and acetowhite lesion segmentation
+
+- **Datasets and Annotation Pipelines**
+  - Jhpiego VIA flashcard set (digitized and manually re-annotated)
+  - IARC Colposcopy ImageBank (rule-based VIA label mapping)
+  - Clinician-reviewed segmentation masks
+
+The goal of this work is to build a robust, scalable AI-assisted VIA interpretation system capable of enhancing diagnostic consistency and reducing disparities in cervical cancer screening across low-resource environments.
 
 ---
 ## Installation
 ### Cloning the repository:
 ```
-git clone https://github.com/your-repo/dermatology-classification.git
-cd dermatology-classification
+git clone https://github.com/eunsoe/VIA_CervicalCancer.git
+cd JHPIEGO
 ```
 
 ### Running the notebook:
 - *Google Colab*
   - Open Colab
-  - Click File > Upload Notebook, and upload the ajl-coq10.ipynb file
+  - Click File > Upload Notebook, and upload the {ADD} VIA_nnunet_segmentation.ipynb files
   - Upload the dataset from AJL
   - Mount to Colab
     - from google.colab import drive
     - drive.mount('/content/drive')
   - Click 'Run All'
-- *Kaggle*
-  - Open Kaggle in the AJL competition
-  - Click 'New Notebook' > Upload
-  - Upload ajl-coq10.ipynb
-  - Click 'Run All'
-  - Kaggle provides a free GPU environment. You can select GPU as the accelerator in the Settings tab of your notebook for faster execution.
 
 ---
 ## Project Objective
