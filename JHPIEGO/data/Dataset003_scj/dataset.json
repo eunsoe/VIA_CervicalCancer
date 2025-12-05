@@ -1,0 +1,18 @@
+{
+    "channel_names": {
+        "0": "RGB"
+    },
+    "labels": {
+        "background": 0,
+        "target": 1
+    },
+    "numTraining": 255,
+    "file_ending": ".png",
+    "licence": "CC-BY-SA 4.0",
+    "converted_by": "Runyu",
+    "name": "scj",
+    "reference": "SCJ medical image dataset",
+    "release": "1.0",
+    "description": "SCJ region segmentation in medical images",
+    "tensorImageSize": "2D"
+}

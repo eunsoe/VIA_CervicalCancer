@@ -1,0 +1,18 @@
+{
+    "channel_names": {
+        "0": "RGB"
+    },
+    "labels": {
+        "background": 0,
+        "lesion": 1
+    },
+    "numTraining": 154,
+    "file_ending": ".png",
+    "licence": "CC-BY-SA 4.0",
+    "converted_by": "Runyu",
+    "name": "lesion",
+    "reference": "Medical lesion segmentation dataset",
+    "release": "1.0",
+    "description": "Lesion segmentation in medical images",
+    "tensorImageSize": "2D"
+}

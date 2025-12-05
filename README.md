@@ -10,7 +10,7 @@ This project investigates the use of artificial intelligence to improve VIA reli
 - **Image Classification Models**
   - EfficientNet-B3 (binary and three-class classification)
   - PaliGemma vision encoder + custom MLP classifier
-  - Hierarchical two-gate system for improved cancer detection
+  - MedGemma Hierarchical two-gate system for improved cancer detection
 
 - **Segmentation Models**
   - YOLOv8-Seg
@@ -35,8 +35,8 @@ cd JHPIEGO
 ### Running the notebook:
 - *Google Colab*
   - Open Colab
-  - Click File > Upload Notebook, and upload the {ADD} VIA_nnunet_segmentation.ipynb files
-  - Upload the dataset from AJL
+  - Click File > Upload Notebook, and upload the VIA_BinaryClassifier.ipynb, VIA_3Class.ipynb, VIA_medgemma.ipynb, and nnunet_new.ipynb files
+  - Upload the datasets in the JHPIEGO folder
   - Mount to Colab
     - from google.colab import drive
     - drive.mount('/content/drive')
@@ -44,193 +44,214 @@ cd JHPIEGO
 
 ---
 ## Project Objective
-Our team’s objective is to improve cervical cancer screening in low-resource settings by developing machine learning models that can support and enhance **Visual Inspection with Acetic Acid (VIA)**. VIA is widely used in low- and middle-income countries (LMICs) due to its low cost and ability to support same-day screen-and-treat workflows, but it is highly operator-dependent and prone to inconsistent interpretation.
+This project aims to build an **AI-assisted VIA interpretation system** capable of:
 
-This project aims to build an AI-assisted VIA decision-support system capable of:
-- Classifying VIA images into clinically meaningful categories (VIA-negative, VIA-positive, suspicious for cancer)
-- Accurately segmenting key anatomical structures (cervix, SCJ, acetowhite lesions)
-- Ultimately improving screening quality and reducing global disparities in cervical cancer outcomes
-
-## Real-World Significance and Impact 🌍
-
-Cervical cancer is preventable, yet it remains a major cause of death for women in LMICs. Over **90% of global cervical cancer deaths** occur in these settings, largely due to limited access to screening and early detection. VIA is currently one of the only scalable screening tools available, but its effectiveness depends heavily on provider experience and the ability to correctly identify:
-
-- The **cervix** and its orientation  
-- The **squamocolumnar junction (SCJ)** and transformation zone  
-- **Acetowhite lesions**, which indicate dysplasia after acetic acid application  
-
-Incorrect interpretation can result in missed precancerous lesions, unnecessary referrals, delayed treatment, or misclassification of cancer risk.
-
-AI has the potential to support frontline clinicians by providing more consistent, objective interpretations of VIA images. An effective AI-supported VIA tool could:
-
-- Reduce diagnostic variability across providers  
-- Enable earlier detection of precancerous lesions  
-- Improve treatment eligibility decisions (e.g., cryotherapy vs. referral)  
-- Strengthen screening programs in resource-constrained environments  
-
-By focusing on clinically relevant anatomical segmentation and classification, this project contributes to global cervical cancer elimination goals and supports more equitable access to high-quality screening.
-
-## Project Goals
-
-- **Develop classification models** capable of predicting VIA-negative, VIA-positive, and suspicious-for-cancer categories.  
-- **Implement segmentation models** (YOLOv8-Seg, U-Net, nn-UNet) to identify the cervix, SCJ, and acetowhite lesions.  
-- **Standardize VIA image preprocessing** through cropping, normalization, and augmentation pipelines.  
-- **Address dataset limitations** through manual annotation, expert-reviewed segmentation, and rule-based label mapping.  
-- **Evaluate model performance** using accuracy, F1-score, Dice coefficient, and qualitative visual inspection.  
-- **Support equitable screening** by improving reliability in settings where variability in clinical expertise affects outcomes.  
-
---- 
-## Data Exploration
-<ins> **Dataset Used** </ins> <br />
-The dataset is a subset of the **Fitzpatrick17k** dataset, a labeled collection of about **17,000** images depicting a variety of serious (e.g., melanoma) and cosmetic (e.g., acne) dermatological conditions with a range of skin tones scored on the Fitzpatrick skin tone scale (FST). About **4500** images are in the subset we used, representing **21 skin conditions** out of the 100+ in the complete Fitzpatrick set.
-
-
-<ins> **Data Dictionary** </ins> <br />
-| Column | Data Type | Description
-| --- | --- | --- |
-| `md5hash` | Object | An alphanumeric hash serving as a unique identifier; file name of an image without .jpg |
-| `fitzpatrick_scale` | int64 | Integer in the range [-1, 0) and [1, 6] indicating self-described FST |
-| `fitzpatrick_centaur` | int64 | Integer in the range [-1, 0) and [1, 6] indicating FST assigned by Centaur Labs, a medical data annotation firm |
-| `label` | Object | String indicating medical diagnosis; the target for this competition |
-| `nine_partition_label` | Object | String indicating one of nine diagnostic categories |
-| `three_partition_label` | Object | String indicating one of three diagnostic categories |
-| `qc` | Object | Quality control check by a Board-certified dermatologist. See note. |
-| `ddi_scale` | int64 | A column used to reconcile this dataset with another dataset (may not be relevant) |
-
-
-<ins> **Original Dataset Files** </ins> <br />
-- `images.zip` - An archive file containing the images
-  - The directory is further divided into a `train` and a `test` directory.
-  - `Train` is further divided into directories according to the image's label.
-  - `Test` is unlabeled and the source of images for making the submission.
-- `train.csv` - Full metadata about the images
-- `test.csv` - The images against which you will make predictions; contains metadata but no 'label' column
-- `sample_submission.csv` - A sample submission file in the correct format.
-  - Note that a correct submission only has two named columns: `md5hash` and `label`
-
-<ins> **Other Sources** </ins> <br />
-"Evaluating Deep Neural Networks Trained on Clinical Images in Dermatology with the Fitzpatrick 17k Dataset", *Matthew Groh and Caleb Harris and Luis Soenksen and Felix Lau and Rachel Han and Aerin Kim and Arash Koochek and Omar Badri*; https://arxiv.org/abs/2104.09957
+- Classifying VIA images into clinically meaningful categories  
+- Segmenting the **cervix**, **SCJ/TZ**, and **acetowhite lesions**  
+- Reducing variability in VIA interpretation across providers  
+- Supporting **screen-and-treat workflows** in low-resource settings  
 
 ---
-## Methodology
-### 1. Dataset & Sources
-- We sourced dermatology datasets from Kaggle, containing images of 21 different skin conditions across various skin tones. The dataset includes:
-  - Training Set (Labeled images with conditions)
-  - Test Set (Unlabeled images for evaluation)
-  - Metadata (CSV files containing image IDs and condition labels)
 
-### 2. Data Augmentation for Better Generalization
-- Data augmentation increases dataset diversity and prevents overfitting:
-  - Rotation (+/- 40°)
-  - Width & Height Shifts (20%)
-  - Shearing & Zooming (20%)
-  - Horizontal Flipping
+## Real-World Significance
+VIA interpretation is limited by:
 
-### 3. Model Architecture & Training
-- Choosing the model:
-  - We used **Transfer Learning** with **EfficientNetB3**, a pre-trained deep learning model that extracts image features while reducing computational costs.
-- Optimizing the Model:
-  - Adam Optimizer
-  - Categorical Crossentropy Loss
-  - Accuracy as the main performance metric
-### 4. Training & Evaluation
-- Model Training:
-  - Trained for **7 epochs**, with **160 steps** per epoch
-  - Used **early stopping** to prevent overfitting
-  - Tracked **validation accuracy**
-- Model Evaluation:
-  - Accuracy: Measures the overall correctness of the model
-  - F1 Score: Combines precision and recall into a single metric, especially useful when the classes are imbalanced
-  - Prediction Confidence Histogram: Visualizes how confident the model is about its predictions.
+- Inconsistent visualization of the **SCJ** and **transformation zone**
+- Subtle, variable **acetowhite patterns**
+- **Inflammation** that mimics lesions
+- Variation in **lighting, angle, and device quality**
+- Differences in **provider training and experience**
+
+An effective AI-assisted VIA tool could:
+
+- Improve detection of **precancerous lesions**
+- Support **cryotherapy eligibility decisions** vs referral
+- Reduce misclassification and unnecessary follow-up
+- Strengthen screening programs where specialists are scarce
+
+This work contributes to global cervical cancer elimination efforts by making VIA interpretation more consistent and objective.
 
 ---
-## Data Exploration and Preprocessing
-### 1️⃣ Data Exploration
-Before training the model, we conducted a thorough exploratory data analysis (EDA) to better understand the dataset's structure, identify potential issues, and inform our preprocessing steps. Key aspects of our data exploration included:
 
-- **Class Distribution**: We examined the distribution of images across the 21 skin conditions in the dataset to identify any class imbalances. We found significant underrepresentation of certain skin conditions, which could introduce bias into the model. This informed our decision to apply data balancing techniques to ensure fair model performance.
-- **Skin Tone Representation**: We reviewed the range of skin tones represented in the dataset using the Fitzpatrick skin tone scale (FST). We noticed that certain skin tones, particularly darker tones, were underrepresented, which could lead to the model performing poorly for those individuals.
-- **Data Quality**: We also performed a quality control check for missing or corrupted data. This was done by reviewing the metadata and verifying image quality to ensure reliable inputs for training.
+## Data Sources
 
- ### *Class Distributions*
-> Displays the distribution of images across the different classes in the dataset
-<img width="745" alt="Class Distribution" src="https://github.com/user-attachments/assets/d42b87b2-d3c9-4443-a300-e4c48f8678c8" />
-
- ### *Image Size Distributions*
-> Visualizes the distribution of image sizes in the dataset, indicating how the images are sized before resizing or processing
-<img width="700" alt="Image Size Distribution" src="https://github.com/user-attachments/assets/c6b9008a-dd24-4912-8f58-046d502525dd" />
-
- ### *Encoded Label Distributions*
-> Shows the distribution of encoded labels for each class, visualizing the number of samples per class after label encoding
-<img width="739" alt="Encoded Label Distribution" src="https://github.com/user-attachments/assets/220eaf68-28b6-4060-a2fb-18eae2352da2" />
-
- ### *Training vs. Validation Set Distributions*
-> Compares the distribution of samples between the training and validation datasets, indicating how the dataset is split for training and validation purposes
-<img width="739" alt="Training vs  Validation Set Distribution" src="https://github.com/user-attachments/assets/4fdc4b75-25df-4bbe-859e-de152fd1b19d" />
-
-### 2️⃣ Preprocessing Approaches
-Data preprocessing is a crucial step in preparing the dataset for model training. Our preprocessing pipeline included:
-
-- **Data Augmentation**: Given the imbalance in the dataset and to improve model generalization, we applied several data augmentation techniques to artificially expand the training set and introduce more variation. This included:
-  - Rotation (45°)
-  - Flipping horizontally
-  - Increasing brightness 50%
-  - Adding Gaussian Blur
-  - Adding extreme color
-  - Adding noise
- 
- ### *Image Augmentation Example #1*
-> Demonstrates an example of image augmentation, highlighting a transformed image generated from an original image through random modifications
-<img width="739" alt="Image Augmentation Example 1" src="https://github.com/user-attachments/assets/6cc2a78e-9413-4018-9a38-a49024c80be0" />
-
- ### *Image Augmentation Example #2*
-> Another example showing the effect of a different augmentation transformation, showcasing the variability introduced to images for training
-<img width="737" alt="Image Augmentation Example 2" src="https://github.com/user-attachments/assets/5ca2b6d9-90d4-4796-9096-8b1c9322277e" />
-
- ### *Image Distribution BEFORE Augmentation*
-> Shows the initial distribution of images before any augmentation techniques were applied
-<img width="740" alt="Image Distribution BEFORE Augmentation" src="https://github.com/user-attachments/assets/643c64d8-e362-4d86-9626-3fb547aa7b05" />
-
- ### *Image Distribution AFTER Augmentation*
-> Displays the updated distribution of images after applying data augmentation, highlighting the increase in image diversity
-<img width="738" alt="Image Distribution AFTER Augmentation" src="https://github.com/user-attachments/assets/81cb652b-d18c-49d0-bd6e-0abdd0e57d84" />
-
- ### *Fitzpatrick Scale Distribution*
-> Illustrates the distribution of Fitzpatrick skin type ratings across the dataset, showing how skin types are distributed
-<img width="741" alt="Fitzpatrick Scale Distribution" src="https://github.com/user-attachments/assets/f3e006d2-52bb-46f4-89ae-0942344f2f46" />
-    
-- **Class Balancing**: To address the class imbalance, we used oversampling and undersampling techniques to ensure a more even distribution of images across the classes. This was critical to mitigate the risk of the model being biased toward more frequent classes.
-- **Normalization**: We normalized the pixel values of the images to a range of [0, 1] to ensure consistent input for the model and speed up convergence during training.
-- **Splitting the Data**: We split the dataset into training and validation sets, ensuring that images from each skin condition were properly represented in both sets. Additionally, we used a test set with unlabeled images to evaluate model performance after training.
-
-These preprocessing and exploration steps were vital in ensuring that the data fed into the model was clean, balanced, and diverse enough to promote fairness and avoid overfitting.
-
-### *Learning Rate Reduction Over Time*
-> Tracks how the learning rate changes over time during training, based on the learning rate reduction callback
-<img width="724" alt="Learning Rate Reducation" src="https://github.com/user-attachments/assets/889b19a2-1d1a-4778-ab24-28df54bf0cc1" />
-
-### *Training and Validation Loss & Accuracy*
-> Plots the training and validation loss and accuracy over epochs, providing a comparison of model performance during training
-<img width="741" alt="Training   Validation Loss:Accuracy" src="https://github.com/user-attachments/assets/6b234be1-1a51-473e-a545-4274760ca412" />
-
-### *Prediction Confidence Histogram*
-> Shows the confidence levels of the model's predictions, illustrating how certain or uncertain the model is about its predictions
-<img width="690" alt="Prediction Confidence Histogram" src="https://github.com/user-attachments/assets/4ce1f01e-162d-4055-a427-a34d06f2ad78" />
+### 1. Jhpiego VIA Flashcards
+- 116 clinically labeled VIA cases  
+- Digitized and cropped using a standardized pipeline  
+- Labels mapped to:  
+  - `VIA_negative`  
+  - `VIA_positive`  
+  - `Suspicious_for_cancer`  
+- Anatomical outlines were manually re-traced in Roboflow to generate clean segmentation masks for:
+  - Cervix  
+  - SCJ  
+  - Lesions  
 
 ---
-## Results and Key Findings
-📊 **Accuracy:** 0.86 <br />
-📊 **F1-Score:** 0.63 <br />
 
-## Future Improvements & Next Steps  
-- **Improve Dataset Diversity**: Source additional dermatology images with diverse skin tones to reduce bias.  
-- **Enhance Fairness Strategies**: Refine class-balancing techniques and explore advanced data augmentation methods.  
-- **Experiment with Alternative Architectures**: Fine-Tuning: Additional fine-tuning of the EfficientNetB3 model may improve performance.
-- **Deploy Model & Conduct Bias Audits**: Evaluate real-world performance across different demographics and ensure fairness in predictions.  
+### 2. IARC VIA ImageBank
+- 186 cases with pre- and post–acetic acid images  
+- **Only post–acetic acid images** used for training  
+- Labels mapped to unified three-class VIA schema  
+- SCJ and lesion masks manually annotated in Roboflow using metadata  
+- All annotations reviewed by clinicians due to absence of ground-truth masks  
+
+---
+
+### 3. IARC Colposcopy ImageBank
+- ~200 colposcopy cases [3]  
+- “Provisional diagnosis” fields converted into VIA-relevant labels using rule-based mapping:
+  - **Included:** carcinoma, invasive, suspicious, HSIL, CIN2/3  
+  - **Excluded:** infections, polyps, HPV-only findings, atrophy, inadequate images  
+- Only **“After acetic acid”** images retained  
+- Final dataset includes normal, precancerous, and suspicious/cancer cases  
+
+---
+
+### 4. AnnoCerv Dataset
+- 100 cases with color-coded masks for:
+  - Cervix  
+  - SCJ / Transformation Zone  
+  - Lesion boundaries  
+- Used exclusively as **external segmentation test data**
+
+Additional datasets listed in Appendix II may strengthen performance but require academic partnerships for access.
+
+---
+
+## Methods (High-Level)
+
+## Classification
+
+### Core Architecture: EfficientNet-B3
+Models trained:
+- **Binary classifier:** normal vs abnormal  
+- **Three-class classifier:** VIA-negative, VIA-positive, suspicious/cancer  
+
+**Binary classifier training setup:**
+- Input size: 300 × 300  
+- Optimizer: **AdamW** (lr = 1e-4)  
+- Weight decay: 1e-4  
+- Label smoothing: 0.1  
+- Mixup: α = 0.2  
+- Loss: **Focal Loss**  
+- 3-fold cross-validation  
+
+### MedGemma / PaliGemma Model
+- Model: `google/paligemma-3b-mix-224`  
+- Vision encoder **frozen**  
+- Custom MLP head trained for 10 epochs  
+  - Batch size: 4  
+  - Learning rate: 1e-3  
+- **Hierarchical two-gate system:**
+  - **Gate 1:** Normal vs Abnormal  
+  - **Gate 2:** VIA-Positive vs Suspicious/Cancer  
+
+---
+
+## Segmentation
+
+### Baseline Models
+- **YOLOv8-Seg**  
+- **Custom U-Net** using multiple loss terms:  
+  - Tversky  
+  - Dice  
+  - Focal  
+  - Boundary Loss  
+  - Anti-collapse penalties  
+
+### Final Model: nn-UNet  
+A fully self-configuring biomedical segmentation framework that:
+
+- Automatically adjusts preprocessing, architecture, and training schedule  
+- Uses dataset **“fingerprints”** to choose hyperparameters [5]  
+
+Three nn-UNet models trained for:
+
+- **Cervix segmentation**  
+- **SCJ/TZ segmentation**  
+- **Lesion segmentation**  
+
+**Standard preprocessing performed by nn-UNet:**
+- Approximate isotropic spacing  
+- Intensity normalization  
+- Patch-based tiling  
+- 2D configuration selected (planar VIA images)  
+
+**Architecture:**
+- Residual U-Net  
+- Instance normalization  
+- Deep supervision  
+
+---
+
+## 📊 Results Overview
+
+---
+
+## **Classification Performance**
+
+### **Summary Table**
+
+| Model                          | Accuracy | F1 Score (Macro / Class)                       | Notes                                                   |
+|-------------------------------|----------|------------------------------------------------|---------------------------------------------------------|
+| Three-class EfficientNet-B3   | 0.50     | 0.51 (macro)                                   | Limited by class imbalance & low cancer case count      |
+| Binary EfficientNet-B3        | 0.79     | 0.80                                           | Sensitivity 81.2%, Specificity 73.3%                    |
+| MedGemma Two-Gate – Gate 1    | 0.80     | Normal F1 = 0.78, Abnormal F1 = 0.83          | Strong separation of normal vs abnormal                 |
+| MedGemma Two-Gate – Gate 2    | 0.88     | VIA+ F1 = 0.93, Suspicious/Cancer F1 = 0.50    | Cancer detection limited by small sample size           |
+
+### **Key Findings**
+- The **three-class classifier is not reliable** with the current dataset.
+- **Binary classification improves performance**, but false negatives remain clinically concerning.
+- **MedGemma hierarchical two-gate model shows the most clinically meaningful behavior**:
+  - **Gate 1** reliably flags abnormal images.
+  - **Gate 2** identifies VIA-positive cases well but struggles with suspicious/cancer due to few examples.
+
+---
+
+## **Segmentation Performance**
+
+### **Dice Scores by Model**
+
+| Landmark  | YOLOv8 | U-Net | nn-UNet (Best) |
+|-----------|--------|-------|----------------|
+| Cervix    | 0.96   | 0.90  | 0.94           |
+| SCJ / TZ  | 0.73   | 0.24  | 0.78           |
+| Lesions   | 0.39   | 0.25  | 0.65           |
+
+### **Key Findings**
+- **Cervix segmentation** is consistently strong due to its large, well-defined structure.
+- **SCJ/TZ segmentation** is harder due to small size, irregular borders, and partial visibility.
+- **Lesion segmentation** is the most challenging:
+  - Small and low contrast  
+  - Often confounded by inflammation  
+  - nn-UNet performs best but still limited (Dice = 0.65)
+
+Segmentation results highlight the need for **more data, higher-quality annotations, and potentially more advanced architectures** for SCJ and lesion tasks.
+
+---
+
+## 🚀 Future Directions
+
+### **1. Dataset Expansion**
+- Increase the number and diversity of VIA images across sites, cameras, and clinical presentations.
+- Add **explicit inflammation labels** and improved SCJ/lesion annotations.
+
+### **2. Integrated “Super-Learner” Model**
+- Combine segmentation + classification + VIA decision rules into a **single end-to-end system**.
+- Provide **interpretable outputs**, such as:
+  - Highlighted lesions  
+  - SCJ/TZ visibility warnings  
+  - Suggested VIA category  
+
+### **3. Low-Cost Deployment**
+- Build a **mobile Android app** for clinics in low-resource settings.
+- Support **offline inference** for areas with limited connectivity.
+- Conduct **usability testing** with frontline VIA providers.
 
 ---
 ## Acknowledgments
-This project is a collaboration between **Algorithmic Justice League** and **Cornell Tech** as part of the **Spring 2025 Kaggle Competition** program.
+This project is a collaboration with **Jhpiego** as part of the **Artificial Intelligence in Global Health** class.
 
 ### Contributors
 The development of this project is a group effort by this team:
@@ -245,7 +266,3 @@ With the help of:
 - Soumyadipta Acharya, MD, PhD
 - Harshad Sanghvi, MD
 - Ricky Lu, MD
-
-## Acknowledgments
-- The project utilizes a dataset from Kaggle's Dermatology Dataset and the EfficientNetB3 model pre-trained on ImageNet.
-- Special thanks to the *Break Through Tech AI* and *Algorithmic Justice League* for providing the challenge resources.

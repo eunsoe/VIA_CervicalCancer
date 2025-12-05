@@ -1,0 +1,18 @@
+{
+    "channel_names": {
+        "0": "RGB"
+    },
+    "labels": {
+        "background": 0,
+        "cervix_lesion": 1
+    },
+    "numTraining": 301,
+    "file_ending": ".png",
+    "licence": "CC-BY-SA 4.0",
+    "converted_by": "Runyu",
+    "name": "cervix",
+    "reference": "Cervix lesion segmentation dataset",
+    "release": "1.0",
+    "description": "Colposcopy images of cervix for lesion segmentation",
+    "tensorImageSize": "2D"
+}
