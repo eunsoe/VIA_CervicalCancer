@@ -231,7 +231,7 @@ Segmentation results highlight the need for **more data, higher-quality annotati
 
 ---
 
-## 🚀 Future Directions
+## Future Directions
 
 ### **1. Dataset Expansion**
 - Increase the number and diversity of VIA images across sites, cameras, and clinical presentations.
